@@ -5,11 +5,20 @@ project:
 benchmark:
   primary_database: mitdb
   primary_sampling_hz: 360
+  development_split_ds1: [101, 106, 108, 109, 112, 114, 115, 116, 118, 119, 122, 124, 201, 203, 205, 207, 208, 209, 215, 220, 223, 230]
+  heldout_split_ds2: [100, 103, 105, 111, 113, 117, 121, 123, 200, 202, 210, 212, 213, 214, 219, 221, 222, 228, 231, 232, 233, 234]
   beat_tolerance_ms: [150, 100, 50]
   sampling_study_hz: [360, 250, 200, 125, 100, 50]
   quantization_bits: [16, 12, 10, 8]
 
+telemetry:
+  historical_event_window_s: 12
+  default_feature_period_s: 10
+  report_payload_and_transport_bytes_separately: true
+
 research_integrity:
-  fixed_threshold_rule: "calibrate once on development data and freeze before test evaluation"
+  fixed_threshold_rule: "calibrate once on DS1 development data and freeze before DS2 evaluation"
   no_per_record_threshold_tuning: true
+  no_test_set_parameter_tuning: true
   archive_results_are_preliminary_only: true
+  hardware_power_latency_claims_without_new_measurements: false
