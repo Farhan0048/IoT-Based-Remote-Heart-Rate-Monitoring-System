@@ -1,0 +1,15 @@
+project:
+  historical_adc_threshold: 620
+  historical_adc_range: [0, 1023]
+
+benchmark:
+  primary_database: mitdb
+  primary_sampling_hz: 360
+  beat_tolerance_ms: [150, 100, 50]
+  sampling_study_hz: [360, 250, 200, 125, 100, 50]
+  quantization_bits: [16, 12, 10, 8]
+
+research_integrity:
+  fixed_threshold_rule: "calibrate once on development data and freeze before test evaluation"
+  no_per_record_threshold_tuning: true
+  archive_results_are_preliminary_only: true
