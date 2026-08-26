@@ -1,62 +1,93 @@
 # IoT ECG Research Framework (Stage 2)
 
-This directory is the reproducible research layer for the historical IoT-Based Remote Heart Rate Monitoring System.
+This directory is the reproducible research layer for the historical **IoT-Based Remote Heart Rate Monitoring System**.
 
 ## Research rule
 
-The original project is treated as archival prototype evidence. New performance claims come from reproducible experiments against annotated public ECG databases. No missing hardware measurements are fabricated.
+The original project is treated as archival prototype evidence. New performance claims must come from reproducible experiments against annotated public ECG databases. Missing hardware measurements must not be fabricated or inferred from software timing.
 
 ## Current implementation
 
 - project-inspired fixed-threshold beat detector;
-- lightweight adaptive-energy detector v0 (research starting point, **not yet claimed as novel**);
-- one-to-one R-peak matching and Sensitivity/PPV/F1/DER metrics;
-- timing-error metrics;
+- lightweight adaptive-energy detector v0 (**research starting point, not yet claimed as novel**);
+- transparent Pan-Tompkins-style baseline;
+- one-to-one R-peak matching;
+- Sensitivity, PPV, F1 and detection-error-rate metrics;
+- R-peak timing-error metrics;
+- beat-to-beat heart-rate MAE/RMSE/MAPE;
 - anti-aliased sampling-rate transformation;
 - uniform ADC-resolution simulation;
+- communication-cost model for continuous, feature-only and event-driven telemetry;
 - PhysioNet downloader;
-- MIT-BIH benchmark runner;
+- DS1-development / DS2-held-out MIT-BIH experiment runner;
 - synthetic sanity tests.
 
-## Setup
+## Environment
 
 ```bash
+cd research
 python -m venv .venv
 source .venv/bin/activate
-pip install numpy scipy pandas wfdb
+pip install -r requirements.txt
 ```
 
 ## Sanity test
 
 ```bash
-cd research
 python sanity_check.py
 ```
 
-## Download first MIT-BIH records
+The sanity test is only a software-integrity check. Synthetic performance is **not** a paper result.
+
+## Download MIT-BIH
 
 ```bash
-cd research
-python fetch_physionet.py --database mitdb --records 100 101 103 105
+python fetch_physionet.py --database mitdb --all-records
 ```
 
-Datasets belong under `research/data/` and should not be committed.
+Public datasets belong under `research/data/` and should not be committed.
 
-## Run baseline benchmark
+## Experimental split
+
+The main MIT-BIH experiment uses the established inter-patient split encoded in `config_stage2.yaml` and `study_runner.py`:
+
+- **DS1:** development/calibration only;
+- **DS2:** held-out final testing only.
+
+The project-inspired fixed threshold is calibrated once from DS1 and frozen before DS2 evaluation. No per-record test-set tuning is permitted.
+
+## Run experiments
+
+Baseline detector comparison:
 
 ```bash
-cd research
-python benchmark_detection.py --records 100 101 103 105
+python study_runner.py --mode baseline
 ```
 
-The first record is currently used only to establish the frozen project-inspired fixed threshold. The final study will use an explicit development/test split at the subject/record level.
+Sampling-rate study:
 
-## Next experiments
+```bash
+python study_runner.py --mode sampling
+```
 
-1. Validate the baseline on a defined MIT-BIH development/test split.
-2. Implement Pan-Tompkins and Hamilton baselines.
-3. Freeze AdaptiveEnergyDetector parameters on development records.
-4. Evaluate held-out MIT-BIH records.
-5. Run sampling-rate and quantization ablations.
-6. Run MIT-BIH Noise Stress Test experiments.
-7. Add event-driven telemetry simulation.
+Quantization study:
+
+```bash
+python study_runner.py --mode quantization
+```
+
+For a small smoke test, `--dev-records` and `--test-records` can override the full split. Those overrides must not be used for final reported results unless documented in the manuscript.
+
+## Planned next work
+
+1. Obtain and execute the official MIT-BIH records in an environment with working PhysioNet/WFDB access.
+2. Freeze adaptive-detector parameters using DS1 only.
+3. Run DS2 baseline, sampling and quantization studies.
+4. Add MIT-BIH Noise Stress Test evaluation.
+5. Add independent INCART validation.
+6. Finalize signal-quality index and event-trigger policy.
+7. Generate publication figures and statistical summaries.
+
+## Integrity boundary
+
+The historical volunteer measurements remain preliminary feasibility evidence. The new software benchmark does not create new claims about physical ESP8266 power, battery life, wireless latency, electrode behavior, or clinical diagnostic performance.
